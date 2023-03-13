@@ -1,14 +1,15 @@
 from flask import Flask, jsonify, request
 import numpy as np
-from keras.models import load_model
+import pickle
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 
-# Load the GRU model
-model = load_model('model.h5')
+# Load the pickled model
+with open('model.pkl', 'rb') as file:
+    model = pickle.load(file)
 
 # Define the tokenizer
-tokenizer = Tokenizer(num_words=1000)
+tokenizer = Tokenizer()
 tokenizer.fit_on_texts(['kebakaran', 'penanganan', 'bukan'])
 
 # Define the Flask app
@@ -17,7 +18,7 @@ app = Flask(__name__)
 # Define the route for the model deployment information
 @app.route('/', methods=['GET'])
 def home():
-    return "Model GRU untuk memprediksi label teks 0, 1, atau 2 telah berhasil di-deploy menggunakan Flask!"
+    return "Model untuk memprediksi label teks 0, 1, atau 2 telah berhasil di-deploy menggunakan Flask!"
 
 # Define the route for text prediction
 @app.route('/predict', methods=['POST'])
@@ -27,10 +28,10 @@ def predict():
     
     # Preprocess the text
     text_sequence = tokenizer.texts_to_sequences([text])
-    text_sequence_padded = pad_sequences(text_sequence, maxlen=100)
+    padded_sequence = pad_sequences(text_sequence, maxlen=50)
     
     # Predict the label for the text
-    label_id = np.argmax(model.predict(text_sequence_padded))
+    label_id = np.argmax(model.predict(padded_sequence))
     
     # Manipulate the label
     if label_id == 0:
