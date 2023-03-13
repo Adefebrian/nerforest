@@ -17,6 +17,10 @@ with open(tokenizer_path, 'r') as f:
 # define label dictionary
 label_dict = {0: "bukan_kebakaran", 1: "kebakaran", 2: "penanganan"}
 
+@app.route('/')
+def index():
+    return 'Model berhasil dideploy'
+
 @app.route('/predict', methods=['POST'])
 def predict():
     # get text input from request
