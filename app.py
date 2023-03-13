@@ -5,7 +5,7 @@ from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 
 # Load the pickled model
-with open('model.pkl', 'rb') as file:
+with open('model_1.pkl', 'rb') as file:
     model = pickle.load(file)
 
 # Define the tokenizer
