@@ -10,7 +10,9 @@ with open('model_1.pkl', 'rb') as file:
 
 # Define the tokenizer
 tokenizer = Tokenizer()
-tokenizer.fit_on_texts(['kebakaran', 'penanganan', 'bukan'])
+with open('data.txt', 'r') as file:
+    data = file.readlines()
+tokenizer.fit_on_texts(data)
 
 # Define the Flask app
 app = Flask(__name__)
@@ -24,22 +26,27 @@ def home():
 @app.route('/predict', methods=['POST'])
 def predict():
     # Get the text from the request
-    text = request.json['text']
+    text = request.json.get('text', '')
+    if not text:
+        return jsonify({'error': 'Text is missing or empty'})
     
     # Preprocess the text
     text_sequence = tokenizer.texts_to_sequences([text])
     padded_sequence = pad_sequences(text_sequence, maxlen=50)
     
     # Predict the label for the text
-    label_id = np.argmax(model.predict(padded_sequence))
+    try:
+        label_id = np.argmax(model.predict(padded_sequence))
+    except Exception as e:
+        return jsonify({'error': 'Failed to predict label', 'details': str(e)})
     
     # Manipulate the label
     if label_id == 0:
-        label = 'bukan kebakaran'
+        label = 0
     elif label_id == 1:
-        label = 'kebakaran'
+        label = 1
     else:
-        label = 'penanganan'
+        label = 2
     
     # Return the prediction as a JSON response
     return jsonify({'text': text, 'label': label})
